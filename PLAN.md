@@ -114,6 +114,20 @@ expires or a data source that changes. Include a plan for dependencies that will
   The page picks up the latest month on its own.
 - **Zone names.** `data/reference/taxi_zone_lookup.csv` comes from TLC. If TLC redraws
   zones, download it again and re-run the pipeline.
+- **Chart libraries.** Plot and d3 are pinned to exact versions at the top of `src/index.md`,
+  and their downloaded copies are committed in `src/.observablehq/cache/_npm/`, so builds never
+  fetch chart code. To upgrade: change the version, delete that folder, `npm run build`, look
+  at the page, commit.
+- **Node.** Netlify builds with Node 22.23.3 (`netlify.toml`). Move it to a newer release on
+  purpose, then check the dev site before promoting.
+- **Security headers.** `netlify.toml` sets the fixed ones. The Content-Security-Policy is
+  written after every build by `scripts/csp-headers.js`. If a new feature is blocked on the
+  live site, the browser console says which rule; change it there, not by removing the policy.
+- **Bad data guard.** The pipeline and the site's data loaders both check the summaries. A
+  failed check stops the build, and Netlify keeps the last good site live.
+- **If something bad reaches a live site.** Quickest: in Netlify's Deploys list, open the last
+  good deploy and choose "Publish deploy". Then fix it properly: `git revert` the bad commit on
+  `dev`, push, check the dev site, and promote to `prod` as usual. Never force push.
 - **Dependencies.** Observable Framework is pinned in `package.json` and DuckDB in
   `pyproject.toml` (with `uv.lock`). Check for updates every few months with `npm outdated`
   and `uv lock --upgrade`, rebuild, and look at the page before committing.

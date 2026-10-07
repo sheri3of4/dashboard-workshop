@@ -19,6 +19,7 @@ import sys
 import time
 import urllib.request
 from pathlib import Path
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parent.parent
 RAW = ROOT / "data" / "raw"
@@ -27,13 +28,26 @@ FILE_LINK = re.compile(r"https://[^\"']+/trip-data/fhvhv_tripdata_(\d{4}-\d{2})\
 MONTHS = 12
 PAUSE_SECONDS = 2
 USER_AGENT = "dashboard-workshop data refresh (one file at a time)"
+# The only server trip files are accepted from. If TLC moves its files, check the new host
+# is really TLC's before adding it here.
+FILE_HOST = "d37ci6vzurychx.cloudfront.net"
 
 
-def request(url, method="GET"):
-    return urllib.request.urlopen(
+def trusted(url, host):
+    parts = urlparse(url)
+    return parts.scheme == "https" and parts.hostname == host
+
+
+def request(url, method="GET", host=None):
+    """Open a URL over HTTPS. With host set, refuse to end up anywhere else after redirects."""
+    response = urllib.request.urlopen(
         urllib.request.Request(url, method=method, headers={"User-Agent": USER_AGENT}),
         timeout=60,
     )
+    if host and not trusted(response.geturl(), host):
+        response.close()
+        raise RuntimeError(f"{url} redirected to {response.geturl()}, which is not {host}. Stopping.")
+    return response
 
 
 def published_months():
@@ -41,6 +55,10 @@ def published_months():
     with request(PAGE) as response:
         html = response.read().decode("utf-8", errors="replace")
     links = {m.group(1): m.group(0) for m in FILE_LINK.finditer(html)}
+    untrusted = [url for url in links.values() if not trusted(url, FILE_HOST)]
+    if untrusted:
+        sys.exit(f"TLC's page links to trip files on an unexpected server: {untrusted[0]}\n"
+                 f"Nothing was downloaded. Check the page by hand before changing FILE_HOST.")
     return sorted(links.items())
 
 
@@ -60,7 +78,7 @@ def same_file(saved, current):
 def download(url, path):
     """Download to a temporary name, check the size, then move it into place."""
     partial = path.with_name(path.name + ".partial")
-    with request(url) as response, open(partial, "wb") as out:
+    with request(url, host=FILE_HOST) as response, open(partial, "wb") as out:
         headers = {k.lower(): v for k, v in response.headers.items()}
         while chunk := response.read(1 << 20):
             out.write(chunk)
@@ -68,6 +86,14 @@ def download(url, path):
     if expected != partial.stat().st_size:
         partial.unlink()
         raise RuntimeError(f"{path.name}: expected {expected:,} bytes, got a different size")
+    # Every Parquet file starts and ends with the bytes PAR1. Anything else is not a trip file.
+    with open(partial, "rb") as f:
+        start = f.read(4)
+        f.seek(-4, 2)
+        end = f.read(4)
+    if start != b"PAR1" or end != b"PAR1":
+        partial.unlink()
+        raise RuntimeError(f"{path.name}: the download is not a Parquet file")
     partial.replace(path)
     path.with_name(path.name + ".headers.json").write_text(json.dumps(headers, indent=2) + "\n")
 
@@ -84,7 +110,7 @@ def main():
         path = RAW / f"fhvhv_tripdata_{month}.parquet"
         if i:
             time.sleep(PAUSE_SECONDS)
-        with request(url, method="HEAD") as response:
+        with request(url, method="HEAD", host=FILE_HOST) as response:
             current = {k.lower(): v for k, v in response.headers.items()}
         saved = cached_headers(path)
 

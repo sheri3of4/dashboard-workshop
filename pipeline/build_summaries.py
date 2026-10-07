@@ -8,6 +8,8 @@ Run it from the project root:
     uv run python pipeline/build_summaries.py
 """
 
+import json
+from email.utils import parsedate_to_datetime
 from pathlib import Path
 
 import duckdb
@@ -114,5 +116,43 @@ con.sql(f"""
     ) TO '{OUT / "zones.csv"}' (HEADER)
 """)
 
-for f in sorted(OUT.glob("*.csv")):
+# Check the results before anyone commits them. The site's data loaders run the same checks
+# at build time, so a bad file can never reach the live page.
+problems = []
+monthly = con.sql(f"SELECT * FROM read_csv('{OUT / 'monthly.csv'}')")
+checks = con.sql("""
+    SELECT count(DISTINCT month), count(*), min(trips), min(days), max(days),
+           count(*) FILTER (wait_p90_min < wait_median_min)
+    FROM monthly
+""").fetchone()
+months, rows, min_trips, min_days, max_days, bad_waits = checks
+if months != len(files):
+    problems.append(f"monthly.csv has {months} months but {len(files)} files were read")
+if rows != months * 3:
+    problems.append(f"monthly.csv should have All, Uber and Lyft for every month ({rows} rows)")
+if min_trips <= 0 or min_days < 28 or max_days > 31 or bad_waits:
+    problems.append("monthly.csv has impossible trip counts, day counts or wait times")
+slots = con.sql(f"SELECT count(*) FROM read_csv('{OUT / 'heatmap.csv'}')").fetchone()[0]
+if slots != 3 * 7 * 24:
+    problems.append(f"heatmap.csv should have 504 rows, has {slots}")
+if problems:
+    raise SystemExit("Summaries failed their checks; do not commit them:\n  " + "\n  ".join(problems))
+
+# Record which TLC files the summaries came from and when TLC published them, so the page can
+# say how fresh the data is. Only the files' own dates are used, so re-running the pipeline
+# on the same files writes the same file.
+def published(parquet):
+    sidecar = parquet.with_name(parquet.name + ".headers.json")
+    headers = {k.lower(): v for k, v in json.loads(sidecar.read_text()).items()}
+    return parsedate_to_datetime(headers["last-modified"]).date().isoformat()
+
+sources = [{"file": f.name, "published": published(f)} for f in files]
+(OUT / "meta.json").write_text(json.dumps({
+    "first_month": files[0].name[15:22],
+    "last_month": files[-1].name[15:22],
+    "latest_published": max(s["published"] for s in sources),
+    "sources": sources,
+}, indent=2) + "\n")
+
+for f in sorted([*OUT.glob("*.csv"), OUT / "meta.json"]):
     print(f"{f.relative_to(ROOT)}: {f.stat().st_size:,} bytes")

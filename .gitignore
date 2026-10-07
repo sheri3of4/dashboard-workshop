@@ -11,7 +11,10 @@ data/raw/*
 node_modules/
 dist/
 .netlify/
-src/.observablehq/cache/
+# Framework's cache, except the pinned browser libraries, which are committed so builds
+# never fetch chart code from the internet.
+src/.observablehq/cache/*
+!src/.observablehq/cache/_npm/
 .venv/
 __pycache__/
 

@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "observable preview",
-    "build": "observable build",
+    "build": "observable build && node scripts/csp-headers.js",
     "clean": "rm -rf src/.observablehq/cache",
     "refresh-data": "uv run python pipeline/fetch_raw.py && uv run python pipeline/build_summaries.py"
   },

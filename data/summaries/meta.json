@@ -1,0 +1,55 @@
+{
+  "first_month": "2025-09",
+  "last_month": "2026-08",
+  "latest_published": "2026-10-01",
+  "sources": [
+    {
+      "file": "fhvhv_tripdata_2025-09.parquet",
+      "published": "2025-10-23"
+    },
+    {
+      "file": "fhvhv_tripdata_2025-10.parquet",
+      "published": "2025-11-25"
+    },
+    {
+      "file": "fhvhv_tripdata_2025-11.parquet",
+      "published": "2025-12-19"
+    },
+    {
+      "file": "fhvhv_tripdata_2025-12.parquet",
+      "published": "2026-02-24"
+    },
+    {
+      "file": "fhvhv_tripdata_2026-01.parquet",
+      "published": "2026-02-24"
+    },
+    {
+      "file": "fhvhv_tripdata_2026-02.parquet",
+      "published": "2026-03-25"
+    },
+    {
+      "file": "fhvhv_tripdata_2026-03.parquet",
+      "published": "2026-04-28"
+    },
+    {
+      "file": "fhvhv_tripdata_2026-04.parquet",
+      "published": "2026-05-21"
+    },
+    {
+      "file": "fhvhv_tripdata_2026-05.parquet",
+      "published": "2026-06-26"
+    },
+    {
+      "file": "fhvhv_tripdata_2026-06.parquet",
+      "published": "2026-09-17"
+    },
+    {
+      "file": "fhvhv_tripdata_2026-07.parquet",
+      "published": "2026-09-17"
+    },
+    {
+      "file": "fhvhv_tripdata_2026-08.parquet",
+      "published": "2026-10-01"
+    }
+  ]
+}

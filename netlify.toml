@@ -5,4 +5,37 @@
   publish = "dist"
 
 [build.environment]
-  NODE_VERSION = "22"
+  NODE_VERSION = "22.23.3"
+
+# Security headers for every page. The Content-Security-Policy is written separately, after
+# each build, by scripts/csp-headers.js, because it depends on what the build produced.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+    X-Frame-Options = "DENY"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()"
+    X-Robots-Tag = "noindex, nofollow"
+
+# Framework puts a content hash in these file names, so a changed file always gets a new name
+# and browsers can keep the old ones for a year.
+[[headers]]
+  for = "/_npm/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_observablehq/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_file/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/_import/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

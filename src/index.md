@@ -3,9 +3,18 @@ title: Operations overview
 ---
 
 ```js
+// Exact versions, so every build uses the same chart code. The downloaded copies are committed
+// in src/.observablehq/cache/_npm/. To upgrade: change a version here, delete that folder,
+// run npm run build, look at the page, then commit.
+import * as Plot from "npm:@observablehq/plot@0.6.17";
+import * as d3 from "npm:d3@7.9.0";
+```
+
+```js
 const monthly = FileAttachment("data/monthly.csv").csv({typed: true});
 const heatmap = FileAttachment("data/heatmap.csv").csv({typed: true});
 const zones = FileAttachment("data/zones.csv").csv({typed: true});
+const meta = FileAttachment("data/meta.json").json();
 ```
 
 ```js
@@ -43,7 +52,7 @@ const zoneLabel = (d) => `${d.zone} (${d.borough})`;
 
 # NYC rideshare operations
 
-<p class="fine-print">High volume for-hire trips (Uber and Lyft) in New York City, ${formatMonth(monthly[0].month)} to ${formatMonth(monthly.at(-1).month)}. Figures cover every trip in the period.</p>
+<p class="fine-print">High volume for-hire trips (Uber and Lyft) in New York City, ${formatMonth(monthly[0].month)} to ${formatMonth(monthly.at(-1).month)}. Figures cover every trip in the period. Newest TLC file published ${d3.utcFormat("%-d %B %Y")(new Date(meta.latest_published))}.</p>
 
 ```js
 const company = view(Inputs.radio(["All", "Uber", "Lyft"], {label: "Company", value: "All"}));
