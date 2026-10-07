@@ -33,6 +33,18 @@ Three to five questions. If a chart does not answer one of these, it does not be
 | 2 | When and where is demand highest? | A weekday by hour heatmap of average trips; the busiest pickup zones ranked |
 | 3 | How long are riders waiting, and where is it worst? | Median and 90th percentile wait last month, with the change; the zones with the longest waits ranked |
 
+## Where the data comes from
+
+- **Source:** TLC's trip record page, https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page.
+  Public, no key needed. TLC publishes each month's file about two months after the month ends,
+  and sometimes re-uploads an older month without saying what changed.
+- **The window:** the latest twelve months TLC lists. The dashboard rolls forward a month when a
+  new file appears.
+- **How it refreshes:** `npm run refresh-data`, run on this laptop. It checks the page, downloads
+  only months that are new or were re-uploaded (one file at a time, so TLC's servers do not block
+  it), rebuilds the summaries, and leaves them ready to commit. Pushing to `dev` updates the test
+  site. Netlify never downloads trip data; it only builds from the committed summaries.
+
 ## Data quality checks
 
 Pick the dimensions that matter from the framework you use. If you have none, tell Claude to

@@ -43,7 +43,7 @@ const zoneLabel = (d) => `${d.zone} (${d.borough})`;
 
 # NYC rideshare operations
 
-<p class="fine-print">High volume for-hire trips (Uber and Lyft) in New York City, September 2025 to August 2026. Figures cover every trip in the period.</p>
+<p class="fine-print">High volume for-hire trips (Uber and Lyft) in New York City, ${formatMonth(monthly[0].month)} to ${formatMonth(monthly.at(-1).month)}. Figures cover every trip in the period.</p>
 
 ```js
 const company = view(Inputs.radio(["All", "Uber", "Lyft"], {label: "Company", value: "All"}));

@@ -13,13 +13,22 @@ from pathlib import Path
 import duckdb
 
 ROOT = Path(__file__).resolve().parent.parent
-RAW = ROOT / "data" / "raw" / "fhvhv_tripdata_*.parquet"
+RAW_DIR = ROOT / "data" / "raw"
 ZONES = ROOT / "data" / "reference" / "taxi_zone_lookup.csv"
 OUT = ROOT / "data" / "summaries"
 
 # A wait counts only when pickup comes after the request and within an hour of it.
 # 1.3% of trips record a pickup before the request; those are left out of wait times.
 MAX_WAIT_SECONDS = 3600
+
+# The dashboard covers the latest twelve months in the cache. Older files may still be there;
+# they are left out so the window rolls forward as new months arrive.
+MONTHS = 12
+files = sorted(RAW_DIR.glob("fhvhv_tripdata_*.parquet"))[-MONTHS:]
+if not files:
+    raise SystemExit(f"No trip files in {RAW_DIR}. Run pipeline/fetch_raw.py first.")
+print(f"Reading {files[0].name} to {files[-1].name} ({len(files)} files)")
+RAW = [str(f) for f in files]
 
 con = duckdb.connect()
 
@@ -38,7 +47,7 @@ con.sql(f"""
              AND epoch(pickup_datetime - request_datetime) <= {MAX_WAIT_SECONDS}
             THEN epoch(pickup_datetime - request_datetime) / 60.0
         END AS wait_min
-    FROM read_parquet('{RAW}', union_by_name = true)
+    FROM read_parquet({RAW}, union_by_name = true)
 """)
 
 # Each summary has one row per company plus an "All" row, so medians are computed over the
@@ -101,7 +110,7 @@ con.sql(f"""
                b.trips, b.wait_trips, b.wait_median_min, b.wait_p90_min
         FROM by_zone b
         LEFT JOIN read_csv('{ZONES}') z ON z.LocationID = b.zone_id
-        ORDER BY b.company, b.trips DESC
+        ORDER BY b.company, b.trips DESC, b.zone_id
     ) TO '{OUT / "zones.csv"}' (HEADER)
 """)
 

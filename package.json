@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "observable preview",
     "build": "observable build",
-    "clean": "rm -rf src/.observablehq/cache"
+    "clean": "rm -rf src/.observablehq/cache",
+    "refresh-data": "uv run python pipeline/fetch_raw.py && uv run python pipeline/build_summaries.py"
   },
   "dependencies": {
     "@observablehq/framework": "1.13.4"
