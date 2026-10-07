@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hello World</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap">
+  <link rel="stylesheet" href="../design-system/tokens.css">
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: calc(var(--spacing-unit) * 2);
+      box-sizing: border-box;
+    }
+
+    main {
+      display: flex;
+      align-items: center;
+      gap: calc(var(--spacing-unit) * 2);
+      padding: calc(var(--spacing-unit) * 4);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+    }
+
+    img {
+      height: 40px;
+      width: auto;
+    }
+
+    h1 {
+      margin: 0;
+      font: var(--text-page-title);
+    }
+
+    p {
+      margin: var(--spacing-unit) 0 0;
+      color: var(--color-text-muted);
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <img src="../design-system/logo.svg" alt="">
+    <div>
+      <h1>Hello, world</h1>
+      <p>Your data quality dashboard starts here.</p>
+    </div>
+  </main>
+</body>
+</html>
