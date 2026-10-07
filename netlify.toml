@@ -1,0 +1,8 @@
+# How Netlify builds this site. Every push to a branch rebuilds that branch's site.
+# The build reads only the committed summaries in data/summaries/, never the raw trips.
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
