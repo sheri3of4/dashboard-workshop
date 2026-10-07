@@ -18,10 +18,10 @@ test and verify, then maintain.
 Name one real person, not "users". Then work backwards from what they are trying to do.
 The `jobs-quote-ux` skill is the standard for this section.
 
-- **The person:** _who opens this dashboard? (role, team)_
-- **What they are trying to do:** _in their words, not the system's_
-- **How often they look:** _daily, weekly, before a meeting_
-- **What they do today instead:** _the spreadsheet, the email, the report someone rebuilds by hand_
+- **The person:** a COO overseeing NYC rideshare operations.
+- **What they are trying to do:** "Are we growing, where and when is demand, and are riders waiting too long?"
+- **How often they look:** weekly, and before the monthly leadership meeting.
+- **What they do today instead:** a slide an analyst rebuilds by hand each month.
 
 ## The questions it answers
 
@@ -29,9 +29,9 @@ Three to five questions. If a chart does not answer one of these, it does not be
 
 | # | Question the person asks | How they will know the answer at a glance |
 |---|---|---|
-| 1 | _e.g. Are trips up or down this month?_ | _one number with the change from last month_ |
-| 2 | | |
-| 3 | | |
+| 1 | Are trips up or down? | Trips per day last month, with the change from the month before; a monthly trend line split by company |
+| 2 | When and where is demand highest? | A weekday by hour heatmap of average trips; the busiest pickup zones ranked |
+| 3 | How long are riders waiting, and where is it worst? | Median and 90th percentile wait last month, with the change; the zones with the longest waits ranked |
 
 ## Data quality checks
 
@@ -41,19 +41,38 @@ through this step.
 
 | Dimension | The rule, in plain words | Where it shows on the dashboard |
 |---|---|---|
-| _e.g. Completeness_ | _every trip has a pickup zone_ | _a score tile plus the failing rows in a table_ |
-| | | |
+| _Deferred_ | Operations views come first; quality checks are added later. | |
+
+Found while profiling (12 months, Sep 2025 to Aug 2026, 251,856,731 trips):
+
+- No missing request times, pickup times or pickup zones.
+- 1.3% of trips record a pickup before the request. These are left out of wait times, as are
+  waits over 60 minutes (0.006%). The page says so next to the wait numbers.
+- The source itself carries a caveat: TLC cannot confirm these company-submitted records are
+  accurate or complete. The page credits the source and notes this.
 
 ## What is on screen
 
-Fill this in based on the user's prompts.
+One page, top to bottom:
+
+1. Headline row: trips per day last month, change from the month before, median wait, 90th percentile wait.
+2. Volume: trips per day by month, one line per company.
+3. Demand: weekday by hour heatmap; top 10 pickup zones.
+4. Waits: median and 90th percentile wait by month; the 10 zones with the longest 90th percentile wait
+   (zones with at least 10,000 trips a year, so small samples do not dominate).
+
+One filter: company (All, Uber, Lyft). It applies to every section.
+
+Wait time means request to pickup. Companies are named from TLC's licence numbers
+(HV0003 is Uber, HV0005 is Lyft).
 
 ## Success criteria
 
 How we will know it is done and right. Each one is something we can check, not a feeling.
 
-- [ ] Every question in "The questions it answers" is answered on screen
-- [ ] The headline numbers match the source (spot-check two of them by hand)
+- [x] Every question in "The questions it answers" is answered on screen
+- [x] The headline numbers match the source (spot-check two of them by hand). August 2026 trips per day,
+  All (661,080) and Uber (477,421), both match a count straight from the raw file.
 - [ ] Every check in "Data quality checks" runs and shows its result
 - [ ] Looked at on the live dev site, at the size the person will use it, and it is both correct and pleasing
 - [ ] A pass against the ten usability heuristics, with nothing serious left open
@@ -77,3 +96,12 @@ How we will know it is done and right. Each one is something we can check, not a
 
 Fill this in as you build: anything that will need attention later, such as a key that
 expires or a data source that changes. Include a plan for dependencies that will need to be updated.
+
+- **New months of data.** Copy the new monthly file into `data/raw/`, then run
+  `uv run python pipeline/build_summaries.py` and commit the updated `data/summaries/`.
+  The page picks up the latest month on its own.
+- **Zone names.** `data/reference/taxi_zone_lookup.csv` comes from TLC. If TLC redraws
+  zones, download it again and re-run the pipeline.
+- **Dependencies.** Observable Framework is pinned in `package.json` and DuckDB in
+  `pyproject.toml` (with `uv.lock`). Check for updates every few months with `npm outdated`
+  and `uv lock --upgrade`, rebuild, and look at the page before committing.

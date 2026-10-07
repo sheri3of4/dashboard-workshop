@@ -86,6 +86,20 @@ Nothing here is navy paired with cyan; the accent is a single teal, muted
 on light backgrounds and lightened for dark ones so it stays legible in
 both directions.
 
+### Chart series
+
+Two colors for telling series apart in a chart, such as one line per company. They are
+separate from the accent and the status colors, so a series never reads as a warning.
+Both pairs were run through a colorblind separation and contrast check against their own
+background.
+
+| Token | Light | Dark |
+|---|---|---|
+| `--color-series-1` | `#0d9488` | `#0fa596` |
+| `--color-series-2` | `#eb6834` | `#d95926` |
+
+Always pair series colors with a legend or a direct label, never color alone.
+
 ## Dark mode
 
 The dark palette applies automatically, following the operating system,

@@ -1,0 +1,75 @@
+/* Framework's base styles, then the design system's tokens mapped onto Framework's theme
+   variables, so every page and chart follows design-system/tokens.css. */
+@import url("observablehq:default.css");
+@import url("observablehq:theme-air.css");
+@import url("../design-system/tokens.css");
+
+:root {
+  color-scheme: light dark;
+  --theme-foreground: var(--color-text);
+  --theme-foreground-focus: var(--color-accent);
+  --theme-background-a: var(--color-background);
+  --theme-background-b: var(--color-surface);
+  --theme-background: var(--color-background);
+  --theme-background-alt: var(--color-surface);
+  --theme-foreground-muted: var(--color-text-muted);
+  --sans-serif: var(--font-sans);
+  --serif: var(--font-sans);
+  --monospace: var(--font-mono);
+}
+
+body {
+  font: var(--text-body);
+}
+
+h1 {
+  font: var(--text-page-title);
+  max-width: none;
+}
+
+h2 {
+  font: var(--text-section-title);
+  margin-top: calc(var(--spacing-unit) * 5);
+}
+
+.site-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-unit);
+  font: var(--text-section-title);
+}
+
+.site-logo svg {
+  display: block;
+  height: 32px;
+  width: auto;
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.card h2 {
+  font: var(--text-small);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.big {
+  font: 600 2rem/1.2 var(--font-sans);
+  font-variant-numeric: tabular-nums;
+}
+
+.change {
+  font: var(--text-small);
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.fine-print {
+  font: var(--text-small);
+  color: var(--color-text-muted);
+  max-width: 72ch;
+}
